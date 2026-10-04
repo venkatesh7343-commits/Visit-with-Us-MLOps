@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 # --------------------------------------------------
 # 1. Load dataset from repository data folder
 # --------------------------------------------------
-DATA_PATH = "tourism_project/data/tourism.csv"
+DATA_PATH = "data/tourism.csv"
 
 df = pd.read_csv(DATA_PATH)
 
@@ -65,7 +65,7 @@ print("Testing set shape:", X_test.shape)
 # --------------------------------------------------
 # 6. Save the feature column names
 # --------------------------------------------------
-FEATURE_COLUMNS_PATH = "tourism_project/model_building/feature_columns.json"
+FEATURE_COLUMNS_PATH = "model_building/feature_columns.json"
 
 with open(FEATURE_COLUMNS_PATH, "w") as f:
     json.dump(X_train.columns.tolist(), f)
@@ -74,22 +74,22 @@ with open(FEATURE_COLUMNS_PATH, "w") as f:
 # 7. Save train and test data
 # --------------------------------------------------
 X_train.to_csv(
-    "tourism_project/model_building/Xtrain.csv",
+    "model_building/Xtrain.csv",
     index=False
 )
 
 X_test.to_csv(
-    "tourism_project/model_building/Xtest.csv",
+    "model_building/Xtest.csv",
     index=False
 )
 
 y_train.to_csv(
-    "tourism_project/model_building/ytrain.csv",
+    "model_building/ytrain.csv",
     index=False
 )
 
 y_test.to_csv(
-    "tourism_project/model_building/ytest.csv",
+    "model_building/ytest.csv",
     index=False
 )
 

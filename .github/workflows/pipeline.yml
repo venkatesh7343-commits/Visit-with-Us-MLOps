@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths-ignore:
-      - "tourism_project/deployment/best_model.pkl"
-      - "tourism_project/deployment/feature_columns.json"
+      - "deployment/best_model.pkl"
+      - "deployment/feature_columns.json"
 
 permissions:
   contents: write
@@ -38,7 +38,7 @@ jobs:
 
       - name: Register and validate data
         run: |
-          python tourism_project/model_building/data_register.py
+          python model_building/data_register.py
 
 
   # ==========================================================
@@ -65,18 +65,18 @@ jobs:
 
       - name: Prepare training and testing data
         run: |
-          python tourism_project/model_building/prep.py
+          python model_building/prep.py
 
       - name: Upload train-test data artifact
         uses: actions/upload-artifact@v4
         with:
           name: train-test-data
           path: |
-            tourism_project/model_building/Xtrain.csv
-            tourism_project/model_building/Xtest.csv
-            tourism_project/model_building/ytrain.csv
-            tourism_project/model_building/ytest.csv
-            tourism_project/model_building/feature_columns.json
+            model_building/Xtrain.csv
+            model_building/Xtest.csv
+            model_building/ytrain.csv
+            model_building/ytest.csv
+            model_building/feature_columns.json
 
 
   # ==========================================================
@@ -105,16 +105,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: train-test-data
-          path: tourism_project/model_building
+          path: model_building
 
       - name: Train and evaluate model
         run: |
-          python tourism_project/model_building/train.py
+          python model_building/train.py
 
       - name: Verify trained model
         run: |
-          test -f tourism_project/deployment/best_model.pkl
-          test -f tourism_project/deployment/feature_columns.json
+          test -f deployment/best_model.pkl
+          test -f deployment/feature_columns.json
           echo "Trained model files verified successfully."
 
       - name: Commit and push trained model
@@ -122,8 +122,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add tourism_project/deployment/best_model.pkl
-          git add tourism_project/deployment/feature_columns.json
+          git add deployment/best_model.pkl
+          git add deployment/feature_columns.json
 
           if git diff --cached --quiet; then
             echo "No model changes to commit."
@@ -157,7 +157,7 @@ jobs:
 
       - name: Validate Streamlit application
         run: |
-          python -m py_compile tourism_project/deployment/app.py
+          python -m py_compile deployment/app.py
 
       - name: Deployment validation successful
         run: |

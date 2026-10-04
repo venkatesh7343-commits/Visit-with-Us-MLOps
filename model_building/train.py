@@ -23,7 +23,7 @@ from sklearn.metrics import (
 # 1. Load train and test data
 # --------------------------------------------------
 
-BASE_PATH = "tourism_project/model_building"
+BASE_PATH = "model_building"
 
 X_train = pd.read_csv(os.path.join(BASE_PATH, "Xtrain.csv"))
 X_test = pd.read_csv(os.path.join(BASE_PATH, "Xtest.csv"))
@@ -139,7 +139,7 @@ with mlflow.start_run(run_name="RandomForest_Hyperparameter_Tuning"):
 # 7. Save best model for deployment
 # --------------------------------------------------
 
-DEPLOYMENT_PATH = "tourism_project/deployment"
+DEPLOYMENT_PATH = "deployment"
 
 os.makedirs(DEPLOYMENT_PATH, exist_ok=True)
 
