@@ -9,6 +9,8 @@ on:
       - "deployment/best_model.pkl"
       - "deployment/feature_columns.json"
 
+  workflow_dispatch:
+
 permissions:
   contents: write
 
