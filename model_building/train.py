@@ -44,9 +44,7 @@ print("Testing data shape:", X_test.shape)
 # 2. Define MLflow tracking
 # --------------------------------------------------
 
-mlflow.set_tracking_uri(
-    os.environ.get("MLFLOW_TRACKING_URI", "file:./mlruns")
-)
+mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
 mlflow.set_experiment("Visit-with-Us-Tourism")
 
