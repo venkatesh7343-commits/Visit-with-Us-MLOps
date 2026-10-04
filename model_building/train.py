@@ -3,8 +3,6 @@ import os
 import json
 import joblib
 import mlflow
-import mlflow.sklearn
-
 import pandas as pd
 
 from sklearn.ensemble import RandomForestClassifier
@@ -18,12 +16,12 @@ from sklearn.metrics import (
     classification_report
 )
 
-
-# --------------------------------------------------
-# 1. Load train and test data
-# --------------------------------------------------
-
 BASE_PATH = "model_building"
+DEPLOYMENT_PATH = "deployment"
+
+# --------------------------------------------------
+# Load train/test data produced by previous workflow job
+# --------------------------------------------------
 
 X_train = pd.read_csv(os.path.join(BASE_PATH, "Xtrain.csv"))
 X_test = pd.read_csv(os.path.join(BASE_PATH, "Xtest.csv"))
@@ -39,18 +37,15 @@ y_test = pd.read_csv(
 print("Training data shape:", X_train.shape)
 print("Testing data shape:", X_test.shape)
 
-
 # --------------------------------------------------
-# 2. Define MLflow tracking
+# MLflow experiment tracking
 # --------------------------------------------------
 
 mlflow.set_tracking_uri("sqlite:///mlflow.db")
-
 mlflow.set_experiment("Visit-with-Us-Tourism")
 
-
 # --------------------------------------------------
-# 3. Define model
+# Model and hyperparameter tuning
 # --------------------------------------------------
 
 model = RandomForestClassifier(
@@ -58,22 +53,12 @@ model = RandomForestClassifier(
     n_jobs=-1
 )
 
-
-# --------------------------------------------------
-# 4. Define hyperparameter grid
-# --------------------------------------------------
-
 param_grid = {
     "n_estimators": [100, 200],
     "max_depth": [None, 10],
     "min_samples_split": [2, 5],
     "min_samples_leaf": [1, 2]
 }
-
-
-# --------------------------------------------------
-# 5. Hyperparameter tuning
-# --------------------------------------------------
 
 grid_search = GridSearchCV(
     estimator=model,
@@ -98,7 +83,7 @@ with mlflow.start_run(run_name="RandomForest_Hyperparameter_Tuning"):
     mlflow.log_params(best_params)
 
     # --------------------------------------------------
-    # 6. Evaluate best model
+    # Evaluation
     # --------------------------------------------------
 
     y_pred = best_model.predict(X_test)
@@ -110,17 +95,11 @@ with mlflow.start_run(run_name="RandomForest_Hyperparameter_Tuning"):
     f1 = f1_score(y_test, y_pred, zero_division=0)
     roc_auc = roc_auc_score(y_test, y_prob)
 
-    # Log evaluation metrics
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_metric("precision", precision)
     mlflow.log_metric("recall", recall)
     mlflow.log_metric("f1_score", f1)
     mlflow.log_metric("roc_auc", roc_auc)
-
-    mlflow.sklearn.log_model(
-        best_model,
-        "random_forest_model"
-    )
 
     print("\nModel Evaluation:")
     print(f"Accuracy : {accuracy:.4f}")
@@ -132,12 +111,9 @@ with mlflow.start_run(run_name="RandomForest_Hyperparameter_Tuning"):
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred))
 
-
 # --------------------------------------------------
-# 7. Save best model for deployment
+# Save deployment model using joblib
 # --------------------------------------------------
-
-DEPLOYMENT_PATH = "deployment"
 
 os.makedirs(DEPLOYMENT_PATH, exist_ok=True)
 
@@ -148,25 +124,25 @@ MODEL_PATH = os.path.join(
 
 joblib.dump(best_model, MODEL_PATH)
 
+# --------------------------------------------------
+# Copy feature columns for deployment
+# --------------------------------------------------
 
-# Save feature columns for consistent deployment preprocessing
 FEATURE_PATH = os.path.join(
     BASE_PATH,
     "feature_columns.json"
 )
 
-if os.path.exists(FEATURE_PATH):
+DEPLOYMENT_FEATURE_PATH = os.path.join(
+    DEPLOYMENT_PATH,
+    "feature_columns.json"
+)
 
-    with open(FEATURE_PATH, "r") as f:
-        feature_columns = json.load(f)
+with open(FEATURE_PATH, "r") as f:
+    feature_columns = json.load(f)
 
-    DEPLOYMENT_FEATURE_PATH = os.path.join(
-        DEPLOYMENT_PATH,
-        "feature_columns.json"
-    )
-
-    with open(DEPLOYMENT_FEATURE_PATH, "w") as f:
-        json.dump(feature_columns, f)
+with open(DEPLOYMENT_FEATURE_PATH, "w") as f:
+    json.dump(feature_columns, f)
 
 print("\nBest model saved to:")
 print(MODEL_PATH)
